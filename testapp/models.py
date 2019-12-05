@@ -62,3 +62,25 @@ def insert_teaches():
 
         print((course_id, sec_id, instructor_name,))
         cursor.execute(insert_SQL, (instructor_name, course_id, sec_id,))
+
+
+def dicfetchall(cursor):
+    "return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
+
+
+from collections import namedtuple
+
+
+def namedturplefetchall(cursor):
+    "return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    nt_result = namedtuple('Result', columns)
+    return [
+        nt_result(*row)
+        for row in cursor.fetchall()
+    ]
