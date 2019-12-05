@@ -1,0 +1,52 @@
+course£º
+INSERT INTO "main"."course" ("course_id", "course_name", "credits", "dept_name") SELECT DISTINCT "course_id", "course_name", "credits", "dept_name" FROM "main"."jwfw" WHERE "sec_id"=1;
+
+INSERT INTO course (course_id , course_name ,credits ,  dept_name ) 
+SELECT DISTINCT  course_id ,  course_name ,  credits ,  MAX(dept_name)  FROM  jwfw GROUP BY course_id ,  course_name ,  credits
+
+
+classroom£º
+INSERT INTO classroom ( building, room_num, capacity ) SELECT
+building,
+room_num,
+MAX( capacity ) 
+FROM
+	jwfw 
+GROUP BY
+	building,
+	room_num
+
+account£º
+INSERT INTO account (user_id,password,role)
+SELECT 'T'||SUBSTR('0000'||A.Row,-4,4),12345,1
+FROM (SELECT ROW_NUMBER() 
+        OVER (ORDER BY name DESC) AS Row, 
+    name 
+FROM (SELECT DISTINCT instructor_name AS name FROM jwfw)) AS A 
+
+INSERT INTO account (user_id,password,role)
+SELECT 'S'||SUBSTR('0000'||s_id,-4,4),54321,2
+FROM students 
+
+instructor£º
+INSERT INTO instructor (i_id,name,dept_name)
+SELECT 'T'||SUBSTR('0000'||A.Row,-4,4) AS id,A.name,A.dept_name
+FROM (SELECT ROW_NUMBER() 
+        OVER (ORDER BY name DESC) AS Row, 
+    name,dept_name
+FROM (SELECT DISTINCT instructor_name AS name,dept_name,MAX(dept_name) FROM jwfw GROUP BY instructor_name)) AS A
+
+student:
+INSERT INTO student (s_id,name,dept_name,tot_cred)
+SELECT 'S'||SUBSTR('0000'||s_id,-4,4),name,dept_name,credits
+FROM students
+
+ctime_slot:
+
+section:
+
+teaches:
+
+
+
+
