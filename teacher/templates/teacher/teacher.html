@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block header-name %}(教师界面){% endblock %}
+{% block nav %}
+    <li class="layui-nav-item layui-nav-itemed">
+        <a class="" href="javascript:;">课程信息管理</a>
+        <dl class="layui-nav-child">
+            <dd><a href="javascript:;">已开设课程管理</a></dd>
+            <dd><a href="javascript:;">开设新课程</a></dd>
+        </dl>
+    </li>
+
+    <li class="layui-nav-item">
+        <a href="javascript:;">选课事务申请</a>
+    </li>
+
+    <li class="layui-nav-item">
+        <a class="" href="javascript:;">期末考试分数登记</a>
+        <dl class="layui-nav-child">
+            <dd><a href="javascript:;">自行登分</a></dd>
+            <dd><a href="javascript:;">移交管理员登分</a></dd>
+        </dl>
+    </li>
+
+{% endblock %}

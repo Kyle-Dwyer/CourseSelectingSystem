@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block header-name %}(学生界面){% endblock %}
+{% block nav %}
+
+    <li class="layui-nav-item layui-nav-itemed">
+        <a class="" href="javascript:;">选/退课</a>
+        <dl class="layui-nav-child">
+            <dd><a href="javascript:;">选课</a></dd>
+            <dd><a href="javascript:;">退课</a></dd>
+        </dl>
+    </li>
+
+    <li class="layui-nav-item">
+        <a href="javascript:;">我的课程表</a>
+    </li>
+
+    <li class="layui-nav-item">
+        <a href="javascript:;">我的成绩单</a>
+    </li>
+
+    <li class="layui-nav-item">
+        <a class="" href="javascript:;">选课事务申请</a>
+        <dl class="layui-nav-child">
+            <dd><a href="javascript:;">查看已有申请</a></dd>
+            <dd><a href="javascript:;">新增申请</a></dd>
+        </dl>
+    </li>
+
+{% endblock %}
