@@ -126,3 +126,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db' # 引擎（默认）

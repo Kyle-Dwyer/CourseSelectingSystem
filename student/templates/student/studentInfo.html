@@ -1,8 +1,9 @@
 {% extends 'student/student.html' %}
 
 {% block body %}
-    <p>学号：S001</p>
-    <p>姓名：王永立</p>
-    <p>所在院系：计算机科学技术学院</p>
-    <p>联系电话：1992842803</p>
+    <p>学号：{{ info.s_id }}</p>
+    <p>姓名：{{ info.name }}</p>
+    <p>所在院系：{{ info.dept_name }}</p>
+    <p>联系电话：{{ info.phone_num }}</p>
+    <p>总学分：{{ info.tot_cred }}</p>
 {% endblock %}
