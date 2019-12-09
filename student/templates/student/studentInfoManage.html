@@ -1,0 +1,37 @@
+{% extends 'student/student.html' %}
+
+{% block body %}
+    <form class="layui-form" id="information" method="post" style="display: none" lay-filter="informationForm">
+        <div class="layui-form-item" style="display: none">
+            <label class="layui-form-label">学号</label>
+            <div class="layui-input-inline">
+                <input name="id"  id="id" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-inline">
+                <input name="name" id="nam" lay-verify="name" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">所在院系</label>
+            <div class="layui-input-inline">
+                <input name="dept" id="dept" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系电话</label>
+            <div class="layui-input-inline">
+                <input name="phone" id="phone" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button id="save" class="layui-btn">保存修改</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
