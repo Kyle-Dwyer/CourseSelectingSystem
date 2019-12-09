@@ -4,6 +4,8 @@ from django.db import connection
 
 # Create your views here.
 def get_stu_info(stu_id):
+    if stu_id is None:
+        return {'error': "no stu_id"}
     SQL_str = "select * from student where s_id = %s"
     cursor = connection.cursor()
     cursor.execute(SQL_str, [stu_id])
@@ -20,6 +22,10 @@ def get_stu_info(stu_id):
 
 def index(request):
     stu_id = request.session.get('student_id')
+    if stu_id is None:
+        print("No stu_id")
+        return render(request, 'student/studentInfo.html', {'error': "no stu_id"})
+    print("debug", stu_id)
     info = get_stu_info(stu_id)
     return render(request, 'student/studentInfo.html', info)
 
