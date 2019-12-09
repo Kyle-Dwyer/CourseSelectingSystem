@@ -15,7 +15,7 @@ def get_stu_info(stu_id):
     dept_name = domain_and_record_db_datas[2]
     phone_num = domain_and_record_db_datas[3]
     tot_cred = domain_and_record_db_datas[4]
-    return {'s_id': stu_id, 'name': name, 'dept_name': phone_num, 'tot_cred': tot_cred}
+    return {'s_id': student_id, 'name': name, 'dept_name': dept_name, 'phone_num': phone_num, 'tot_cred': tot_cred}
 
 
 def index(request):
