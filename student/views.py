@@ -6,7 +6,7 @@ from django.db import connection
 def get_stu_info(stu_id):
     SQL_str = "select * from student where s_id = %s"
     cursor = connection.cursor()
-    cursor.execute(SQL_str, stu_id)
+    cursor.execute(SQL_str, [stu_id])
     domain_and_record_db_datas = cursor.fetchone()
     print(len(domain_and_record_db_datas))
     print(domain_and_record_db_datas)
