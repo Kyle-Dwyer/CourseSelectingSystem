@@ -1,7 +1,8 @@
-{% extends 'teacher/teacher.html' %}
+{% extends 'student/student.html' %}
 
 {% block body %}
     <form class="layui-form" id="information" lay-filter="informationForm">
+
         <div class="layui-form-item">
             <label class="layui-form-label">工号</label>
             <div class="layui-input-inline">
@@ -37,30 +38,41 @@
 
 
     </form>
+
     <button id="save" class="layui-btn">保存修改</button>
 {% endblock %}
 
 {% block js %}
+
     <script>
 
         layui.use('element', function () {
             var element = layui.element;
+
         });
 
-    </script>
+        layui.use('layer', function () {
+            var layer = layui.layer;
 
-    <script>
-        $('#save').click(function () {
-            $.ajax({
-                url: "{% url 'saveInfo' %}"
-                , type: 'get'
-                , data: {
-                    "phone_num": $("#phone").val()
-                }
-                , success: function (data) {
-                    layer.msg(data)
-                }
+            $('#save').click(function () {
+
+                $.ajax({
+                    url: '{% url 'saveInfo' %}'
+                    , type: 'get'
+                    , data: {
+                        "phone_num": $("#phone").val()
+                    }
+                    , success: function (data) {
+                        if (data["state"] === true)
+                            layer.msg("更改个人信息成功");
+                        else
+                            layer.msg("更改个人信息失败");
+                    }
+                })
+
             })
         });
+
+
     </script>
 {% endblock %}
