@@ -1,10 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'student/student.html' %}
 
-</body>
-</html>
+{% block body %}
+    <form class="layui-form" id="information" lay-filter="informationForm">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">工号</label>
+            <div class="layui-input-inline">
+                <input autocomplete="off" class="layui-input" value="{{ i_id }}" disabled>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-inline">
+                <input autocomplete="off" lay-verify="required" class="layui-input" value="{{ name }}" disabled>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">所在院系</label>
+            <div class="layui-input-inline">
+                <input autocomplete="off" class="layui-input" value="{{ dept_name }}" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系电话</label>
+            <div class="layui-input-inline">
+                <input id="phone" autocomplete="off" lay-verify="number" class="layui-input" value="{{ phone_num }}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">薪水</label>
+            <div class="layui-input-inline">
+                <input autocomplete="off" class="layui-input" value="{{ salary }}" disabled>
+            </div>
+        </div>
+
+
+    </form>
+
+    <button id="save" class="layui-btn">保存修改</button>
+{% endblock %}
+
+{% block js %}
+
+    <script>
+
+        layui.use('element', function () {
+            var element = layui.element;
+
+        });
+
+        layui.use('layer', function () {
+            var layer = layui.layer;
+
+            $('#save').click(function () {
+
+                $.ajax({
+                    url: '{% url 'saveInfo' %}'
+                    , type: 'get'
+                    , data: {
+                        "phone_num": $("#phone").val()
+                    }
+                    , success: function (data) {
+                        if (data["state"] === true)
+                            layer.msg("更改个人信息成功");
+                        else
+                            layer.msg("更改个人信息失败");
+                    }
+                })
+
+            })
+        });
+
+
+    </script>
+{% endblock %}
