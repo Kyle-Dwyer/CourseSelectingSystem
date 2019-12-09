@@ -1,6 +1,10 @@
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.db import connection
+from django.views.decorators.csrf import csrf_exempt
 
+
+info = None
 
 # Create your views here.
 def get_stu_info(stu_id):
@@ -26,9 +30,25 @@ def index(request):
         print("No stu_id")
         return render(request, 'student/studentInfo.html', {'error': "no stu_id"})
     print("debug", stu_id)
+
+    global info
     info = get_stu_info(stu_id)
     return render(request, 'student/studentInfo.html', info)
 
 
+def showStudentInfoManage(request):
+    return render(request, 'student/studentInfoManage.html',info)
+
+
+def saveStudentInfo(request):
+    stu_id = request.session.get('student_id')
+    phone_num = request.GET.get("phone_num")
+    sql = "update student set phone_num = %s where s_id = %s"
+    cursor = connection.cursor()
+    cursor.execute(sql, [phone_num,stu_id])
+    return HttpResponse("更新信息成功")
+
+
 def showCourseTable(request):
     return render(request, 'student/courseTable.html')
+

@@ -1,37 +1,75 @@
 {% extends 'student/student.html' %}
 
 {% block body %}
-    <form class="layui-form" id="information" method="post" style="display: none" lay-filter="informationForm">
-        <div class="layui-form-item" style="display: none">
+    <form class="layui-form" id="information" lay-filter="informationForm">
+
+        <div class="layui-form-item">
             <label class="layui-form-label">学号</label>
             <div class="layui-input-inline">
-                <input name="id"  id="id" autocomplete="off" class="layui-input">
+                <input autocomplete="off" class="layui-input" value="{{ s_id }}" disabled>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">姓名</label>
             <div class="layui-input-inline">
-                <input name="name" id="nam" lay-verify="name" autocomplete="off" class="layui-input">
+                <input autocomplete="off" lay-verify="required" class="layui-input" value="{{ name }}" disabled>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">所在院系</label>
             <div class="layui-input-inline">
-                <input name="dept" id="dept" autocomplete="off" class="layui-input">
+                <input autocomplete="off" class="layui-input" value="{{ dept_name }}" disabled>
             </div>
         </div>
 
         <div class="layui-form-item">
             <label class="layui-form-label">联系电话</label>
             <div class="layui-input-inline">
-                <input name="phone" id="phone" autocomplete="off" class="layui-input">
+                <input id="phone" autocomplete="off" lay-verify="number" class="layui-input" value="{{ phone_num }}">
             </div>
         </div>
 
         <div class="layui-form-item">
-            <div class="layui-input-block">
-                <button id="save" class="layui-btn">保存修改</button>
+            <label class="layui-form-label">总学分</label>
+            <div class="layui-input-inline">
+                <input autocomplete="off" class="layui-input" value="{{ tot_cred }}" disabled>
             </div>
         </div>
+
+
     </form>
+
+    <button id="save" class="layui-btn">保存修改</button>
+{% endblock %}
+
+{% block js %}
+
+    <script>
+
+        layui.use('element', function () {
+            var element = layui.element;
+
+        });
+
+        layui.use('layer', function () {
+            var layer = layui.layer;
+
+            $('#save').click(function () {
+
+                $.ajax({
+                    url: '{% url 'saveInfo' %}'
+                    , type: 'get'
+                    , data: {
+                        "phone_num": $("#phone").val()
+                    }
+                    , success: function (data) {
+                        layer.msg(data)
+                    }
+                })
+
+            })
+        });
+
+
+    </script>
 {% endblock %}
