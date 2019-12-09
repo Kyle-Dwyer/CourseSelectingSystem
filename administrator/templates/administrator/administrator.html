@@ -2,33 +2,32 @@
 
 {% block header-name %}(管理员界面){% endblock %}
 
-{% block nav %}
+{% block header-nav %}
+     <li class="layui-nav-item">
+        <a href="javascript:">
+          <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+          管理员
+        </a>
+    </li>
+
+    <li class="layui-nav-item"><a href="">退出登录</a></li>
+{% endblock %}
+
+{% block side-nav %}
     <li class="layui-nav-item">
-        <a class="" href="javascript:;">教师信息管理</a>
-        <dl class="layui-nav-child">
-            <dd><a href="javascript:;">查看教师信息</a></dd>
-            <dd><a href="javascript:;">增加教师</a></dd>
-        </dl>
+        <a class="" href="teacherManage.html">教师信息管理</a>
     </li>
 
     <li class="layui-nav-item">
-        <a class="" href="javascript:;">学生信息管理</a>
-        <dl class="layui-nav-child">
-            <dd><a href="javascript:;">查看学生信息</a></dd>
-            <dd><a href="javascript:;">增加学生</a></dd>
-        </dl>
+        <a class="" href="studentManage.html">学生信息管理</a>
     </li>
 
     <li class="layui-nav-item">
-        <a class="" href="javascript:;">课程信息管理</a>
-        <dl class="layui-nav-child">
-            <dd><a href="javascript:;">查看课程信息</a></dd>
-            <dd><a href="javascript:;">增加课程</a></dd>
-        </dl>
+        <a class="" href="courseManage.html">课程信息管理</a>
     </li>
 
     <li class="layui-nav-item">
-        <a class="" href="javascript:;">期末考试分数登记</a>
+        <a class="" href="registerScore.html">期末考试分数登记</a>
     </li>
 
 {% endblock %}
