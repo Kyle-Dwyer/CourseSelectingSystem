@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'teacher/teacher.html' %}
 
-</body>
-</html>
+{% block body %}
+    <p>工号：{{ i_id }}</p>
+    <p>姓名：{{ name }}</p>
+    <p>所在院系：{{ dept_name }}</p>
+    {% ifnotequal  phone_num  None %}
+        <p>联系电话：{{ phone_num }}</p>
+    {% else %}
+        <p>联系电话：无</p>
+    {% endifnotequal %}
+    <p>薪水：{{ salary }}</p>
+{% endblock %}
