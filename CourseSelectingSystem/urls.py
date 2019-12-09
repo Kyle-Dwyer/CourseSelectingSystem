@@ -16,8 +16,11 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
+from . import views
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^login/', views.login),
     url(r'^student/', include('student.student_urls')),
     url(r'^teacher/', include('teacher.teacher_urls')),
     url(r'^administrator/', include('administrator.administrator_urls')),

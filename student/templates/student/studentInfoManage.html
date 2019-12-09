@@ -57,7 +57,7 @@
             $('#save').click(function () {
 
                 $.ajax({
-                    url: '{% url 'saveInfo' %}'
+                    url: '{% url 'saveStudentInfo' %}'
                     , type: 'get'
                     , data: {
                         "phone_num": $("#phone").val()
