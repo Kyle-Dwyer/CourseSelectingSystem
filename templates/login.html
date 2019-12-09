@@ -4,59 +4,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/login.css' %}"/>
     <title>登录</title>
 </head>
 <body>
 <div class="logindiv">
-	<div class="banner1"></div>
-	<div class="banner2"></div>
-<form id="loginForm" name="loginForm" action="" method="post" target="_top" >
+    <div class="banner1"></div>
+    <div class="banner2"></div>
+    <form id="loginForm" name="loginForm" method="post" target="_top">
+        {% csrf_token %}
+        <table class="bulletin">
+            <tr>
+                <td>
+                    <div id="s4">
+                        <div><img style="width:430px;height:230px;" src="{% static 'image/gallery1.png' %}"/></div>
+                    </div>
+                </td>
+            </tr>
+        </table>
 
-		<table class="bulletin">
-			<tr>
-				<td>
-					<div id="s4">
-						<div><img style="width:430px;height:230px;" src="{% static 'image/gallery1.png' %}"/></div>
+        <table class="logintable">
+            <tr>
+                <td colspan="2" style="text-align:center;color:red;"></td>
+            </tr>
+            <tr>
+                <td><label for="username">用户名:&nbsp;</label></td>
+                <td>
+                    <input name="username" id="username" tabindex="1" title="请输入用户名" type="text" value=""
+                           style="width:105px;"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="password">密　码:&nbsp;</label>
+                </td>
+                <td>
+                    <input id="password" name="password" tabindex="2" type="password" style="width:105px;"/>
+                    <input name="encodedPassword" type="hidden" value=""/>
+                </td>
+            </tr>
+            <tr>
+                <td></td><td></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button type="button" id="save" tabindex="6" class="blue-button"></button>
+                </td>
+            </tr>
+        </table>
 
-					</div>
-				</td>
-			</tr>
-		</table>
-
-		<table class="logintable">
-			<tr>
-				<td colspan="2" style="text-align:center;color:red;"></td>
-			</tr>
-			<tr>
-				<td><label for="username">用户名:&nbsp;</label></td>
-				<td>
-					<input name="username" id="username" tabindex="1" title="请输入用户名" type="text" value="" style="width:105px;"/>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<label for="password">密　码:&nbsp;</label>
-				</td>
-				<td>
-					<input id="password" name="password"  tabindex="2" type="password" style="width:105px;"/>
-					<input name="encodedPassword" type="hidden" value=""/>
-				</td>
-			</tr>
-			<tr>
-				<td>
-				</td>
-				<td>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="2">
-<input type="submit"  value="" onclick="bg.form.submit('loginForm',null,null,checkLogin);return false;" name="submitBtn" tabindex="6" class="blue-button"/>
-				</td>
-			</tr>
-		</table>
-
-</form>
+    </form>
 </div>
 </body>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="{% static 'layui/layui.js' %}"></script>
+<script>
+    layui.use('element', function(){
+        var element = layui.element;
+    });
+
+    layui.use('layer', function () {
+            var layer = layui.layer;
+
+            $('#save').click(function () {
+
+                $.ajaxSetup({
+                    data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+                });
+
+                $.ajax({
+                    url: '{% url 'handleLogin' %}'
+                    , type: 'post'
+                    , data: {
+                        "id": $("#username").val(),
+                        "password": $("#password").val()
+                    }
+                    , success: function (data) {
+                        if(data.error == null){
+                            layer.msg("登录成功！");
+                            tp = parseInt(data.Type);
+                            if(tp == 0)
+                                window.location.href = "../administrator/index";
+                            else if(tp == 1)
+                                window.location.href = "../teacher/index";
+                            else if(tp == 2)
+                                window.location.href = "../student/index";
+                            else
+                                window.location.href = "error.html";
+                        }
+                        else {
+                            layer.msg(data.error)
+                        }
+                    }
+                })
+
+            })
+        });
+</script>
+
 </html>

@@ -59,3 +59,13 @@ def saveTeacherInfoMessage(request):
     state = upadate_tea_info(tea_id, phone_num)
     print(state)
     return JsonResponse({"state": state})
+
+
+def showCourseApply(request):
+    return render(request, 'teacher/courseApply.html', info)
+
+
+def showRegisterScore(request):
+    return render(request, 'teacher/registerScore.html', info)
+
+

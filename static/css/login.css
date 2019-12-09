@@ -1,0 +1,181 @@
+
+html, body {
+	width : 100%; height : 100%
+}
+body {
+	background:  url("../image/body.png") no-repeat;
+	background-size:100%
+}
+.logindiv {
+	z-index : 1;
+	width : 700px;
+	height : 360px;
+	display : block;
+	position : absolute;
+	left : 50%;
+	top : 50%;
+	margin-left : -250px;
+	margin-top : -180px;
+	border : 1px #106EB6 solid;
+	text-align : center;
+	background-color : #FFFFFF;
+  	background-image: -webkit-linear-gradient(top, #D1E3ED 0%, #FFFFFF 20%);
+  	background-image:    -moz-linear-gradient(top, #D1E3ED 0%, #FFFFFF 20%);
+  	background-image:     -ms-linear-gradient(top, #D1E3ED 0%, #FFFFFF 20%);
+  	background-image:      -o-linear-gradient(top, #D1E3ED 0%, #FFFFFF 20%);
+  	background-image:         linear-gradient(to bottom, #D1E3ED 0%, #FFFFFF 20%);
+}
+.blue-button {
+	background: url("../image/button.jpg") no-repeat scroll 0 0 transparent;
+    border: medium none;
+    cursor: pointer;
+    height: 33px;
+    line-height: 20px;
+    text-align: center;
+    width: 80px;
+    margin-left : 7px;
+    margin-right : 7px;
+}
+
+
+.logindiv h1 {
+	color : #074B7C;
+	font-weight : bold;
+	font-size : 20pt;
+	margin-top : 5%;
+}
+.logindiv .logintable {
+	position : absolute;
+	width : 220px;
+	height : 234px;
+	right : 20px;
+	top : 50%;
+	margin-top : -82px;
+	border : 1px #7DC4DB solid;
+	-webkit-border-radius : 5px;
+	   -moz-border-radius : 5px;
+	    -ms-border-radius : 5px;
+	     -o-border-radius : 5px;
+	        border-radius : 5px;
+
+}
+.logindiv .bulletin {
+	position : absolute;
+	width : 425px;
+	height : 234px;
+	left : 20px;
+	top : 50%;
+	margin-top : -82px;
+	border : 1px #7DC4DB solid;
+	-webkit-border-radius : 5px;
+	   -moz-border-radius : 5px;
+	    -ms-border-radius : 5px;
+	     -o-border-radius : 5px;
+	        border-radius : 5px;
+
+}
+.bulletin td   	{ text-align:left;vertical-align:top; }
+.bulletin a 	{ text-decoration:underline;cursor:pointer;color:black; }
+.bulletin a:hover 	{ color:red; }
+
+.bulletin li 	{ line-height: 1.8em; }
+
+.logindiv .footage {
+	position : absolute;
+	right : 20px;
+	bottom : 30px;
+	margin-top : -82px;
+	border : 0px #7DC4DB solid;
+}
+.footage a 	{ text-decoration:none;cursor:pointer; color:black; }
+.footage a:hover 	{ color:red; }
+
+.foot {
+	z-index : 0;
+	display : block;
+	position : absolute;
+	width : 100%;
+	height : 30%;
+	bottom : 0px;
+	}
+.logintable input[type=text],input[type=password] {
+    background-color: #FFFFFF;
+    border: 1px solid #CCCCCC;
+}
+.logintable tr td:nth-child(1) {
+	width : 70px;
+	text-align: right;
+}
+.logintable tr td:nth-child(2) {
+	text-align : left;
+}
+.logintable tr td:nth-child(3) {
+	width : 60px;
+	text-align: center;
+	vertical-align: middle;
+}
+.logintable tr:nth-last-child(2) td {
+	text-align: center;
+}
+.logintable tr:nth-last-child(1) td {
+	text-align: center;
+}
+/* For browser hint */
+.browser-hint {
+    display : none;
+	z-index : 2;
+           width : 500px;
+          height : 95px;
+	    position : absolute;
+	         top : 0px;
+	        left : 50%;
+	 margin-left : -250px;
+	  text-align : center;
+background-color : #FEF9D0;
+}
+.browser-hint h2 {
+	font-size : 12px;
+}
+.browser-hint ul {
+	padding : 0px 20px;
+	/* IE7 hack, otherwise ul will left space on left */
+	margin : 0px;
+}
+.browser-hint li {
+	height : 60px;
+	width  : 60px;
+	text-align : center;
+    list-style: none outside none;
+    float: left;
+	margin  : 0px 46px;
+}
+.browser-hint li a {
+	display : block;
+	height  : 60px;
+	width   : 60px;
+}
+
+
+.ie6 .browser-hint {
+      display: block;
+}
+.ie7 .browser-hint {
+      display: block;
+}
+.banner1 {
+	position : absolute;
+	top : 15px;
+	left : 22px;
+	width : 301px;
+	height : 75px;
+	background : url("../image/banner1.png") no-repeat scroll 0 0 transparent;
+}
+.banner2 {
+	position : absolute;
+	top : 33px;
+	right : 45px;
+	width : 182px;
+	height : 35px;
+	background : url("../image/banner2.png") no-repeat scroll 0 0 transparent;
+}
+.mailto { text-decoration: none !important;}

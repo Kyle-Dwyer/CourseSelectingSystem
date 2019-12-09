@@ -24,17 +24,14 @@ def login(request):
     id = request.POST.get("id")
     pwd = request.POST.get("password")
     info = _login(id, pwd)
-    if info.get("login") == True:
+    if info.get("login") is True:
         if info.get("Type") == 0:
             request.session["Admin"] = id
-            return render(request, "administrator/administrator.html")
+
         elif info.get("Type") == 1:
             request.session["teacher_id"] = id
-            return render(request, "student/studentInfo.html")
+
         elif info.get("Type") == 2:
-            request.session["teacher_id"] = id
-            return render(request, "teacher/teacherInfo.html")
-        else:
-            return render(request, "./error.html", {"error": "Hacker!"})
-    else:
-        return JsonResponse({"error": info.get("error")})
+            request.session["student_id"] = id
+
+    return JsonResponse(info)

@@ -52,3 +52,15 @@ def saveStudentInfo(request):
 def showCourseTable(request):
     return render(request, 'student/courseTable.html')
 
+
+def showCourseApply(request):
+    return render(request, 'student/courseApply.html',info)
+
+
+def showCourseManage(request):
+    return render(request, 'student/courseManage.html',info)
+
+
+def showTranscript(request):
+    return render(request, 'student/transcript.html',info)
+
