@@ -3,8 +3,8 @@ from django.shortcuts import render
 from django.db import connection
 from django.views.decorators.csrf import csrf_exempt
 
-
 info = None
+
 
 # Create your views here.
 def get_stu_info(stu_id):
@@ -37,7 +37,7 @@ def index(request):
 
 
 def showStudentInfoManage(request):
-    return render(request, 'student/studentInfoManage.html',info)
+    return render(request, 'student/studentInfoManage.html', info)
 
 
 def saveStudentInfo(request):
@@ -45,7 +45,7 @@ def saveStudentInfo(request):
     phone_num = request.GET.get("phone_num")
     sql = "update student set phone_num = %s where s_id = %s"
     cursor = connection.cursor()
-    cursor.execute(sql, [phone_num,stu_id])
+    cursor.execute(sql, [phone_num, stu_id])
     return HttpResponse("更新信息成功")
 
 
@@ -54,13 +54,354 @@ def showCourseTable(request):
 
 
 def showCourseApply(request):
-    return render(request, 'student/courseApply.html',info)
+    return render(request, 'student/courseApply.html', info)
 
 
 def showCourseManage(request):
-    return render(request, 'student/courseManage.html',info)
+    return render(request, 'student/courseManage.html', info)
+
+
+def showCourse(request):
+    course_id = request.GET.get('course_id', "")
+    course_name = request.GET.get("course_name", "")
+    page = int(request.GET.get('page', 1))
+    pageSize = 6
+
+    # print(course_id)
+    # print(course_name)
+    sql = "select course_id, sec_id, course_name, ctime_slot_id from course natural join main.section where course_id like %s and course_name like %s"
+    cursor = connection.cursor()
+    cursor.execute(sql, ['%' + course_id + '%', '%' + course_name + '%'])
+    results = cursor.fetchall()
+
+    returnList = []
+
+    fromIndex = (page - 1) * pageSize
+    toIndex = min(len(results), page * pageSize)
+    for i in range(fromIndex, toIndex):
+        result = results[i]
+        returnList.append(
+            {'course_id': result[0] + '.' + str(result[1]), 'course_name': result[2], 'ctime_slot_id': result[3]})
+
+    # print(returnList)
+    return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': len(results), 'list': returnList})
+
+
+def no_conflict(start1, end1, start2, end2):
+    if start1 > end2 or end1 < start2:
+        return True
+    else:
+        return False
+
+
+def _selectCourse(s_id, c_id, sec_id):
+    error_none = {"error": "选课失败，该课程不存在", "selected": False}
+    cursor = connection.cursor()
+    # 插入还是更新
+    check_sql = "select dropped from takes where s_id = %s and course_id = %s and sec_id = %s"
+    cursor.execute(check_sql, [s_id, c_id, sec_id])
+    drop = cursor.fetchone()
+    insert = True
+    if drop is not None:
+        if drop[0] == 0:
+            return {"error": "选课失败，该课程已在课表中", "selected": False}
+        elif drop[0] == 1:
+            insert = False
+    # 人数限制
+    select_limit_sql = "select `limit` from `section` where  course_id = %s and sec_id = %s"
+    cursor.execute(select_limit_sql, [c_id, sec_id])
+    result = cursor.fetchone()
+    if result is None:
+        return error_none
+    else:
+        limit = result[0]
+    select_num_sql = "select count(*) from takes where course_id = %s and sec_id = %s and dropped = 0"
+    cursor.execute(select_num_sql, [c_id, sec_id])
+    result = cursor.fetchone()
+    if result is None:
+        return error_none
+    else:
+        num = result[0]
+    if num >= limit:
+        return {"error": "选课失败，人数已达上限", "selected": False}
+    # 课程冲突
+    selct_time_sql = "select * from ctime_slot where  ctime_slot_id = (select ctime_slot_id from `section` where course_id = %s and sec_id = %s)"
+    cursor.execute(selct_time_sql, [c_id, sec_id])
+    course_time = cursor.fetchall()
+    # print(course_time)
+    if course_time is None:
+        return error_none
+    select_selectedcourse_sql = "select * from ctime_slot where  ctime_slot_id in (select ctime_slot_id from `section` where (course_id,sec_id) in (select course_id,sec_id from takes where s_id = %s and dropped = 0))"
+    cursor.execute(select_selectedcourse_sql, [s_id])
+    selected_course_time = cursor.fetchall()
+    # print(selected_course_time)
+    if len(selected_course_time) != 0:
+        for i in range(len(course_time)):  # 要选课程每行判断
+            day = course_time[i][1]
+            if day in [selected_course_time[a][1] for a in range(len(selected_course_time))]:  # 如果有新的day才判断这一行，否则跳过
+                start1 = course_time[i][2]
+                end1 = course_time[i][3]
+                # print(1, day, start1, end1)
+                for _, day2, start2, end2 in selected_course_time[:]:  # 抽出该day已选课程所有的时间段
+                    # print(2, day2, start2, end2)
+                    if day2 == day and not no_conflict(start1, end1, start2, end2):
+                        return {"error": "选课失败，该课程上课时间与已选课程有冲突", "selected": False}
+    # 考试冲突
+    selct_time_sql = "select `day`,start_time,end_time from etime_slot natural join exam where `type` = 0 and etime_slot_id = (select etime_slot_id from exam where course_id = %s and sec_id = %s)"
+    cursor.execute(selct_time_sql, [c_id, sec_id])
+    exam_time = cursor.fetchall()
+    if exam_time is None:
+        return error_none
+    select_selectedexam_sql = "select `day`,start_time,end_time from etime_slot natural join exam where `type` = 0 and etime_slot_id in (select etime_slot_id from exam where (course_id,sec_id) in (select course_id,sec_id from takes where s_id = %s and dropped = 0))"
+    cursor.execute(select_selectedexam_sql, [s_id])
+    selected_exam_time = cursor.fetchall()
+    if len(selected_exam_time) != 0:
+        for i in range(len(exam_time)):  # 要选课程每行判断
+            day = exam_time[i][0]
+            if day in [selected_exam_time[a][0] for a in range(len(selected_exam_time))]:  # 如果有新的day才判断这一行，否则跳过
+                start1 = exam_time[i][1]
+                end1 = exam_time[i][2]
+                # print(day, start1, end1)
+                for day2, start2, end2 in selected_exam_time[:]:  # 抽出该day已选课程所有的时间段
+                    # print(day2, start2, end2)
+                    if day2 == day and not no_conflict(start1, end1, start2, end2):
+                        return {"error": "选课失败，该课程考试时间与已选课程有冲突", "selected": False}
+    try:
+        if insert:
+            insert_sql = "insert into takes (s_id, course_id, sec_id, year, semester, dropped) values (%s, %s, %s, 2019, 1, 0)"
+            cursor.execute(insert_sql, [s_id, c_id, sec_id])
+        else:
+            update_sql = "update takes set dropped = 0 where s_id = %s and course_id = %s and sec_id = %s "
+            cursor.execute(update_sql, [s_id, c_id, sec_id])
+    except Exception:
+        connection.connection.rollback()
+        return {"error": "选课失败，请检查您的课表或者稍后再选", "selected": False}
+    return {"error": None, "selected": True}
+
+
+def _applyCourse(s_id, c_id, sec_id, reason):
+    error_none = {"error": "申请失败，该课程不存在", "selected": False}
+    cursor = connection.cursor()
+    # 已选或者退过
+    check_sql = "select dropped from takes where s_id = %s and course_id = %s and sec_id = %s"
+    cursor.execute(check_sql, [s_id, c_id, sec_id])
+    drop = cursor.fetchone()
+    insert = True
+    if drop is not None:
+        if drop[0] == 0:
+            return {"error": "申请失败，该课程已在课表中", "selected": False}
+        elif drop[0] == 1:
+            return {"error": "申请失败，您已经退过该门课程，本学期不能申请", "selected": False}
+    # 已经、正在申请
+    check_sql = "select state from apply where s_id = %s and course_id = %s and sec_id = %s"
+    cursor.execute(check_sql, [s_id, c_id, sec_id])
+    state = cursor.fetchone()
+    if state is not None:
+        return {"error": "申请失败，您已经申请过该门课程，本学期不能申请", "selected": False}
+    # 人数限制--有余量
+    select_limit_sql = "select `limit` from `section` where  course_id = %s and sec_id = %s"
+    cursor.execute(select_limit_sql, [c_id, sec_id])
+    result = cursor.fetchone()
+    if result is None:
+        return error_none
+    else:
+        limit = result[0]
+    select_num_sql = "select count(*) from takes where course_id = %s and sec_id = %s and dropped = 0"
+    cursor.execute(select_num_sql, [c_id, sec_id])
+    result = cursor.fetchone()
+    if result is None:
+        return error_none
+    else:
+        num = result[0]
+    if num < limit:
+        return {"error": "申请失败，该课程还有余量", "selected": False}
+    # 人数限制--超过教室容量
+    select_applied_sql = "select count(*) from apply where course_id = %s and sec_id = %s and state = 0"
+    cursor.execute(select_applied_sql, [c_id, sec_id])
+    result = cursor.fetchone()
+    applied_num = 0
+    if result is not None:
+        applied_num = result[0]
+    select_capacity_sql = "select capacity from `section`natural join classroom where  course_id = %s and sec_id = %s"
+    cursor.execute(select_capacity_sql, [c_id, sec_id])
+    result = cursor.fetchone()
+    if result is None:
+        return error_none
+    else:
+        capacity = result[0]
+    if num + applied_num >= capacity:
+        return {"error": "申请失败，该教室已满", "selected": False}
+    # 课程冲突
+    selct_time_sql = "select * from ctime_slot where  ctime_slot_id = (select ctime_slot_id from `section` where course_id = %s and sec_id = %s)"
+    cursor.execute(selct_time_sql, [c_id, sec_id])
+    course_time = cursor.fetchall()
+    # print(course_time)
+    if course_time is None:
+        return error_none
+    select_selectedcourse_sql = "select * from ctime_slot where  ctime_slot_id in (select ctime_slot_id from `section` where (course_id,sec_id) in (select course_id,sec_id from takes where s_id = %s and dropped = 0))"
+    cursor.execute(select_selectedcourse_sql, [s_id])
+    selected_course_time = cursor.fetchall()
+    # print(selected_course_time)
+    # print(course_time)
+    if len(selected_course_time) != 0:
+        for i in range(len(course_time)):  # 要选课程每行判断
+            day = course_time[i][1]
+            if day in [selected_course_time[a][1] for a in range(len(selected_course_time))]:  # 如果有新的day才判断这一行，否则跳过
+                start1 = course_time[i][2]
+                end1 = course_time[i][3]
+                # print(1, day, start1, end1)
+                for _, day2, start2, end2 in selected_course_time[:]:  # 抽出该day已选课程所有的时间段
+                    # print(2, day2, start2, end2)
+                    if day2 == day and not no_conflict(start1, end1, start2, end2):
+                        return {"error": "申请失败，该课程上课时间与已选课程有冲突", "selected": False}
+    # 考试冲突
+    selct_time_sql = "select `day`,start_time,end_time from etime_slot natural join exam where `type` = 0 and etime_slot_id = (select etime_slot_id from exam where course_id = %s and sec_id = %s)"
+    cursor.execute(selct_time_sql, [c_id, sec_id])
+    exam_time = cursor.fetchall()
+    if exam_time is None:
+        return error_none
+    select_selectedexam_sql = "select `day`,start_time,end_time from etime_slot natural join exam where `type` = 0 and etime_slot_id in (select etime_slot_id from exam where (course_id,sec_id) in (select course_id,sec_id from takes where s_id = %s and dropped = 0))"
+    cursor.execute(select_selectedexam_sql, [s_id])
+    selected_exam_time = cursor.fetchall()
+    if len(selected_exam_time) != 0:
+        for i in range(len(exam_time)):  # 要选课程每行判断
+            day = exam_time[i][0]
+            if day in [selected_exam_time[a][0] for a in range(len(selected_exam_time))]:  # 如果有新的day才判断这一行，否则跳过
+                start1 = exam_time[i][1]
+                end1 = exam_time[i][2]
+                # print(day, start1, end1)
+                for day2, start2, end2 in selected_exam_time[:]:  # 抽出该day已选课程所有的时间段
+                    # print(day2, start2, end2)
+                    if day2 == day and not no_conflict(start1, end1, start2, end2):
+                        return {"error": "申请失败，该课程考试时间与已选课程有冲突", "selected": False}
+    try:
+        insert_sql = "insert into apply (s_id, course_id, sec_id, year, semester, `state`, apply_reason) values (%s, %s, %s, 2019, 1, 0, %s)"
+        cursor.execute(insert_sql, [s_id, c_id, sec_id, reason])
+    except Exception:
+        connection.connection.rollback()
+        return {"error": "申请失败，请检查您的课表或者稍后再选", "selected": False}
+    return {"error": None, "selected": True}
+
+
+def applyCourse(request):
+    course_id = request.GET.get('course_id', ".")
+    reason = request.GET.get('reason', "我想选课")
+    c_id = course_id.split(".")[0]
+    sec_id = course_id.split(".")[1]
+
+    s_id = request.session.get('student_id', '')
+    state = _applyCourse(s_id, c_id, sec_id, reason)
+    return JsonResponse(state)
+
+
+def selectCourse(request):
+    course_id = request.GET.get('course_id', ".")
+    c_id = course_id.split(".")[0]
+    sec_id = course_id.split(".")[1]
+
+    s_id = request.session.get('student_id', '')
+    state = _selectCourse(s_id, c_id, sec_id)
+    return JsonResponse(state)
+
+
+def showSelectedCourse(request):
+    s_id = request.session.get('student_id', '')
+
+    pageSize = 6
+    page = int(request.GET.get('page', 1))
+
+    sql = "select course_id, sec_id, course_name, ctime_slot_id from course natural join `section` where (course_id, sec_id) in (select course_id, sec_id from takes where s_id = %s and dropped = 0)"
+    cursor = connection.cursor()
+    cursor.execute(sql, [s_id])
+    results = cursor.fetchall()
+
+    returnList = []
+
+    if len(results) is 0:
+        return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': 0, 'list': []})
+    else:
+        fromIndex = (page - 1) * pageSize
+        toIndex = min(len(results), page * pageSize)
+
+        for i in range(fromIndex, toIndex):
+            course_id = results[i][0]
+            sec_id = results[i][1]
+            course_name = results[i][2]
+            ctime_slot_id = results[i][3]
+
+            sql = "select `day`, start_time, end_time from ctime_slot where ctime_slot_id = %s"
+            cursor.execute(sql, [ctime_slot_id])
+            result2 = cursor.fetchall()
+
+            ctime = ""
+            for j in range(len(result2)):
+                day = result2[j][0]
+                start_time = result2[j][1]
+                end_time = result2[j][2]
+                ctime += day + " " + str(start_time) + "-" + str(end_time) + ";"
+
+            returnList.append(
+                {'course_id': course_id + '.' + str(sec_id), 'course_name': course_name, 'ctime_slot_id': ctime})
+
+        return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': len(results), 'list': returnList})
+
+
+def dejectCourse(request):
+    course_id = request.GET.get('course_id', ".")
+    c_id = course_id.split(".")[0]
+    sec_id = course_id.split(".")[1]
+
+    s_id = request.session.get('student_id', '')
+
+    sql = "update takes set dropped = 1 where s_id = %s and course_id = %s and sec_id = %s"
+    cursor = connection.cursor()
+    try:
+        cursor.execute(sql, [s_id, c_id, sec_id])
+    except Exception:
+        connection.connection.rollback()
+        return JsonResponse({"error": "退课失败，你没有选过这门课", "dejected": False})
+    return JsonResponse({"error": None, "dejected": True})
 
 
 def showTranscript(request):
-    return render(request, 'student/transcript.html',info)
+    return render(request, 'student/transcript.html', info)
 
+
+def showAppliedCourse(request):
+    s_id = request.session.get('student_id', '')
+
+    pageSize = 6
+    page = int(request.GET.get('page', 1))
+
+    sql = "select apply_reason, state, handle_reason, course_id, sec_id, course_name from apply natural join course where s_id = %s"
+    cursor = connection.cursor()
+    cursor.execute(sql, [s_id])
+    results = cursor.fetchall()
+
+    returnList = []
+
+    if len(results) is 0:
+        return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': 0, 'list': []})
+    else:
+        fromIndex = (page - 1) * pageSize
+        toIndex = min(len(results), page * pageSize)
+
+        for i in range(fromIndex, toIndex):
+            apply_reason = results[i][0]
+            state = int(results[i][1])
+            if state == 0:
+                state = "正在处理"
+            elif state == 1:
+                state = "申请成功"
+            elif state == 2:
+                state = "申请失败"
+            handle_reason = results[i][2]
+            course_id = results[i][3]
+            sec_id = results[i][4]
+            course_name = results[i][5]
+
+            returnList.append(
+                {'course_id': course_id + '.' + str(sec_id), 'course_name': course_name, 'reason': apply_reason,
+                 'handle_reason': handle_reason, 'state': state})
+
+        return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': len(results), 'list': returnList})

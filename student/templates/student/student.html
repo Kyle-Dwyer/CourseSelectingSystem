@@ -13,13 +13,13 @@
           <dd><a href="{% url 'studentInfoManage' %}">修改信息</a></dd>
         </dl>
       </li>
-      <li class="layui-nav-item"><a href="">退出登录</a></li>
+      <li class="layui-nav-item"><a href=''>退出登录</a></li>
 {% endblock %}
 
 {% block side-nav %}
 
     <li class="layui-nav-item {% block nav1 %}{% endblock %}">
-        <a href="courseApply.html">选/退课</a>
+        <a href="{% url 'courseManage' %}">选/退课</a>
 
     </li>
 
@@ -32,7 +32,7 @@
     </li>
 
     <li class="layui-nav-item {% block nav4 %}{% endblock %}">
-        <a href="courseApply.html">选课事务申请</a>
+        <a href="{% url 'studentCourseApply' %}">选课事务申请</a>
 
     </li>
 

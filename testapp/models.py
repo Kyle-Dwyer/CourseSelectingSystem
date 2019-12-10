@@ -27,10 +27,10 @@ def insert_ctime_slot():
     cursor = connection.cursor()
     cursor.execute(SQL_str)
     domain_and_record_db_datas = cursor.fetchall()
-    start_time = ['8:00', '8:55', '9:55', '10:50', '11：45', '13:30', '14:25', '15:25', '16:20', '17:15', '18:30',
+    start_time = ['8:00', '8:55', '9:55', '10:50', '11:45', '13:30', '14:25', '15:25', '16:20', '17:15', '18:30',
                   '19:25',
                   '20:20', '21:15']
-    end_time = ['8:45', '9:40', '10:40', '11:35', '12：30', '14:15', '15:10', '16:10', '17:05', '18:00', '19:15',
+    end_time = ['8:45', '9:40', '10:40', '11:35', '12:30', '14:15', '15:10', '16:10', '17:05', '18:00', '19:15',
                 '20:10',
                 '21:05', '22:00']
     insert_SQL = "INSERT into ctime_slot(ctime_slot_id, `day`, start_time, end_time) values (%s,%s,%s,%s)"
@@ -84,3 +84,6 @@ def namedturplefetchall(cursor):
         nt_result(*row)
         for row in cursor.fetchall()
     ]
+
+if __name__ == '__main__':
+    insert_ctime_slot()

@@ -10,6 +10,8 @@ def _login(id, pwd):
     cursor = connection.cursor()
     cursor.execute(SQL_str, [id])
     domain_and_record_db_datas = cursor.fetchone()
+    if domain_and_record_db_datas is None:
+        return {"error": "学（工）号或密码错误", "login": False, "Type": None}
     if pwd == domain_and_record_db_datas[0]:
         return {"error": None, "login": True, "Type": domain_and_record_db_datas[1]}
     else:
