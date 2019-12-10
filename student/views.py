@@ -309,8 +309,7 @@ def showSelectedCourse(request):
 
     pageSize = 6
     page = int(request.GET.get('page', 1))
-
-    sql = "select course_id, sec_id, course_name, ctime_slot_id from course natural join `section` where (course_id, sec_id) in (select course_id, sec_id from takes where s_id = %s and dropped = 0)"
+    sql = "select course_id, sec_id, course_name, ctime_slot_id from `section` natural join course where (course_id, sec_id) in (select course_id, sec_id from takes where s_id = %s and dropped = 0)"
     cursor = connection.cursor()
     cursor.execute(sql, [s_id])
     results = cursor.fetchall()
