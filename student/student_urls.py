@@ -18,5 +18,9 @@ urlpatterns = [
     url(r'^showSelectedCourse/', views.showSelectedCourse, name='showSelectedCourse'),
     url(r'^dejectCourse/', views.dejectCourse, name='dejectCourse'),
 
-    url(r'^transcript/', views.showTranscript, name='transcript'),
+    url(r'^transcript/', views.transcript, name='transcript'),
+    url(r'^showTranscript/', views.showTranscript, name='showTranscript'),
+
+    url(r'^studentExamList/', views.studentExamList, name='studentExamList'),
+    url(r'^showStudentExamList/', views.showStudentExamList, name='showStudentExamList'),
 ]

@@ -26,6 +26,12 @@ def login(request):
     id = request.POST.get("id")
     pwd = request.POST.get("password")
     info = _login(id, pwd)
+
+    period = request.session.get("period", 0)
+    request.session.clear()
+
+    request.session["period"] = period
+
     if info.get("login") is True:
         if info.get("Type") == 0:
             request.session["Admin"] = id
@@ -37,3 +43,4 @@ def login(request):
             request.session["student_id"] = id
 
     return JsonResponse(info)
+

@@ -3,10 +3,10 @@
 {% block body %}
 
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-        <legend>我的成绩单</legend>
+        <legend>我的考试信息</legend>
     </fieldset>
 
-    <table class="layui-hide" id="transcript" lay-filter="demo"></table>
+    <table class="layui-hide" id="exam_list" lay-filter="demo"></table>
 {% endblock %}
 
 {% block js %}
@@ -21,16 +21,17 @@
             var table = layui.table;
 
             table.render({
-                elem: '#transcript'
-                , url: "{% url 'showTranscript' %}"
+                elem: '#exam_list'
+                , url: "{% url 'showStudentExamList' %}"
                 , limit: 6
                 , method: 'get'
                 , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
                 , cols: [[
                     {field: 'course_id', title: '课程代码', sort: true}
                     , {field: 'course_name', title: '课程名称'}
-                    , {field: 'credit', title: '学分', sort: true}
-                    , {field: 'grade', title: '成绩', sort: true}
+                    , {field: 'type', title: '考试种类', sort: true}
+                    , {field: 'etime', title: '考试时间/论文提交截止时间'}
+                    , {field: 'place', title: '考试地点'}
                 ]]
                 , parseData: function (res) { //res 即为原始返回的数据
                     return {

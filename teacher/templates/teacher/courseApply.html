@@ -1,10 +1,148 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'teacher/teacher.html' %}
 
-</body>
-</html>
+{% block body %}
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>待处理申请</legend>
+    </fieldset>
+
+    <table class="layui-hide" id="handleTable" lay-filter="demo"></table>
+
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>已处理申请</legend>
+    </fieldset>
+
+    <table class="layui-hide" id="handledTable"></table>
+
+    <div class="layui-input-block" id="handle_reason" style="width: 400px;height: 200px;margin: auto;display: none">
+        <textarea name="desc" placeholder="请输入处理原因" class="layui-textarea"></textarea>
+        <p style="text-align: center">
+            <button class="layui-btn" id="apply">处理申请</button>
+        </p>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">批准</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">拒绝</a>
+    </script>
+
+    <script>
+
+        layui.use('element', function () {
+            var element = layui.element;
+
+        });
+
+        layui.use('table', function () {
+            var table = layui.table;
+            table.render({
+                elem: '#handleTable'
+                , url: "{% url 'showHandleApply' %}"
+                , limit: 6
+                , method: 'get'
+                , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                , cols: [[
+                    {field: 'course_id', title: '课程代码', sort: true}
+                    , {field: 'course_name', title: '课程名称'}
+                    , {field: 's_id', title: '学生id'}
+                    , {field: 'reason', title: '申请原因'}
+                    , {field: 'handle_reason', title: '处理原因'}
+                    , {fixed: 'right', title: '操作', width: 178, align: 'center', toolbar: '#barDemo'}
+                ]]
+                , parseData: function (res) { //res 即为原始返回的数据
+                    return {
+                        "code": 0, //解析接口状态
+                        "msg": "", //解析提示文本
+                        "count": res.totalNum, //解析数据长度
+                        "data": res.list//解析数据列表
+                    };
+                }
+                , id: 'testReload1'
+                , page: true
+            });
+
+            function reloadTable() {
+                table.reload('testReload1', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                }, 'data');
+
+                table.reload('testReload2', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                }, 'data');
+            }
+
+            function barEvent(event, data) {
+                state = 0;
+                if (event === 'edit')
+                    state = 1;
+                else if (event === 'del')
+                    state = 2;
+                layer.open({
+                    type: 1
+                    , shade: 0 //不显示遮罩
+                    , title: '填写处理原因'
+                    , content: $("#handle_reason")
+                    , area: ['400px', '300px']
+                });
+
+                $("#apply").click(function () {
+                    $.ajax({
+                        url: '{% url 'handleApply' %}',
+                        type: 'get',
+                        data: {
+                            "course_id": data.course_id,
+                            "state": state,
+                            "handle_reason": $("textarea").val(),
+                            "s_id": data.s_id
+                        },
+                        success: function (data) {
+                            if (data.error == null) {
+                                layer.msg("处理成功！");
+                                reloadTable()
+                            } else {
+                                layer.msg(data.error)
+                            }
+                        }
+                    });
+
+                })
+            }
+
+            table.on('tool(demo)', function (obj) {
+                var data = obj.data;
+                barEvent(obj.event, data)
+            });
+
+            table.render({
+                elem: '#handledTable'
+                , url: "{% url 'showHandledApply' %}"
+                , limit: 6
+                , method: 'get'
+                , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                , cols: [[
+                    {field: 'course_id', title: '课程代码', sort: true}
+                    , {field: 'course_name', title: '课程名称'}
+                    , {field: 's_id', title: '学生id'}
+                    , {field: 'reason', title: '申请原因'}
+                    , {field: 'handle_reason', title: '处理原因'}
+                    , {field: 'state', title: '申请状态', sort: true}
+                ]]
+                , parseData: function (res) { //res 即为原始返回的数据
+                    return {
+                        "code": 0, //解析接口状态
+                        "msg": "", //解析提示文本
+                        "count": res.totalNum, //解析数据长度
+                        "data": res.list//解析数据列表
+                    };
+                }
+                , id: 'testReload2'
+                , page: true
+            });
+        });
+    </script>
+{% endblock %}

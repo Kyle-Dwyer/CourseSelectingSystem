@@ -1,0 +1,41 @@
+{% extends 'administrator/administrator.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" media="screen" type="text/css"/>
+
+{% endblock %}
+
+{% block body %}
+    {% ifequal period 0 %}
+        <label class="button"><input id="checkbox" type="checkbox" checked><span></span><span></span></label>
+    {% else %}
+        <label class="button"><input id="checkbox" type="checkbox"><span></span><span></span></label>
+    {% endifequal %}
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        layui.use('element', function () {
+            var element = layui.element;
+
+        });
+
+        layui.use('layer', function () {
+            var layer = layui.layer;
+            $("#checkbox").change(function () {
+                $.ajax({
+                    url: '{% url 'changePeriod' %}',
+                    type: 'get',
+                    data: {
+                        "period": this.checked,
+                    },
+                    success: function (data) {
+                        layer.msg("修改成功！")
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -3,31 +3,57 @@
 {% block header-name %}(管理员界面){% endblock %}
 
 {% block header-nav %}
-     <li class="layui-nav-item">
+
+    <li class="layui-nav-item">
         <a href="javascript:">
-          <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
-          管理员
+            <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+            管理员
         </a>
+        <dl class="layui-nav-child">
+            <dd><a href="{% url 'periodPage' %}">修改当前时间段</a></dd>
+        </dl>
     </li>
 
-    <li class="layui-nav-item"><a href="">退出登录</a></li>
+    <li class="layui-nav-item"><a href="{% url 'login' %}">退出登录</a></li>
 {% endblock %}
 
 {% block side-nav %}
     <li class="layui-nav-item">
-        <a class="" href="teacherManage.html">教师信息管理</a>
+        <a class="" href="javascript:">教师信息管理</a>
+        <dl class="layui-nav-child">
+            <dd><a href="{% url 'instructorList' %}">查看教师列表</a></dd>
+            <dd><a href="{% url 'loadInstructor' %}">导入教师信息</a></dd>
+        </dl>
     </li>
 
     <li class="layui-nav-item">
-        <a class="" href="studentManage.html">学生信息管理</a>
+        <a class="" href="javascript:">学生信息管理</a>
+        <dl class="layui-nav-child">
+            <dd><a href="{% url 'studentList' %}">查看学生列表</a></dd>
+            <dd><a href="{% url 'loadStudent' %}">导入学生信息</a></dd>
+        </dl>
     </li>
 
     <li class="layui-nav-item">
-        <a class="" href="courseManage.html">课程信息管理</a>
+        <a class="" href="javascript:">开课信息管理</a>
+        <dl class="layui-nav-child">
+            <dd><a href="{% url 'sectionList' %}">查看开课列表</a></dd>
+            <dd><a href="{% url 'loadSection' %}">导入开课信息</a></dd>
+        </dl>
     </li>
 
     <li class="layui-nav-item">
-        <a class="" href="registerScore.html">期末考试分数登记</a>
+        <a class="" href="javascript:">考试信息管理</a>
+        <dl class="layui-nav-child">
+            <dd><a href="{% url 'examList' %}">查看考试列表</a></dd>
+        </dl>
+    </li>
+
+    <li class="layui-nav-item">
+        <a class="" href="javascript:">期末考试分数登记</a>
+        <dl class="layui-nav-child">
+            <dd><a href="{% url 'loadGrades' %}">导入分数信息</a></dd>
+        </dl>
     </li>
 
 {% endblock %}

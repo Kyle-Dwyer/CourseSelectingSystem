@@ -1,0 +1,72 @@
+{% extends 'administrator/administrator.html' %}
+
+{% block body %}
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>导入期末考试分数信息</legend>
+    </fieldset>
+
+    <div class="layui-upload">
+        <button type="button" class="layui-btn layui-btn-normal" id="test8">选择文件</button>
+        <button type="button" class="layui-btn" id="test9">开始上传</button>
+    </div>
+
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>导入失败的分数列表</legend>
+    </fieldset>
+
+    <table id="fail_list" lay-filter="demo"></table>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+
+        layui.use('element', function () {
+            var element = layui.element;
+
+        });
+
+        function render_table(res) {
+            layui.use('table', function () {
+                var table = layui.table;
+
+                table.render({
+                    elem: '#fail_list'
+                    , limit: 6
+                    , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                    , cols: [[
+                        {field: 'line', title: '行数', sort: true}
+                        , {field: 's_id', title: '学号'}
+                        , {field: 'course_id', title: '课程代码'}
+                        , {field: 'year', title: '学年', width: 100}
+                        , {field: 'semester', title: '学期', width: 100}
+                        , {field: 'credit', title: '成绩', width: 100}
+                        , {field: 'error', title: '失败原因'}
+                    ]]
+                    , data: res.fail_list
+                    , page: true
+                });
+            });
+        }
+
+        layui.use('upload', function () {
+            var $ = layui.jquery;
+            var upload = layui.upload;
+
+            upload.render({
+                elem: '#test8'
+                , url: '{% url 'gradesExcel' %}'
+                , auto: false
+                , accept: 'file'
+                , exts: 'xls|csv'
+                //,multiple: true
+                , bindAction: '#test9'
+                , data: {csrfmiddlewaretoken: '{{ csrf_token }}'}
+                , done: function (res) {
+                    layer.msg('插入成功：' + res.success_num + "条 ; 插入失败：" + res.fail_num + "条");
+                    render_table(res)
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -22,7 +22,7 @@ from . import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/', views.login_page),
+    url(r'^login/', views.login_page,name="login"),
     url(r'^handleLogin/', views.login,name='handleLogin'),
 
     url(r'^student/', include('student.student_urls')),

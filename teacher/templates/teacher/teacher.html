@@ -6,26 +6,31 @@
 
     <li class="layui-nav-item">
         <a href="javascript:">
-          <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
-          我的
+            <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+            我的
         </a>
         <dl class="layui-nav-child">
-          <dd><a href="{% url 'teacherInfo' %}">个人信息</a></dd>
-          <dd><a href="{% url 'teacherInfoManage'%}">修改信息</a></dd>
+            <dd><a href="{% url 'teacherInfo' %}">个人信息</a></dd>
+            <dd><a href="{% url 'teacherInfoManage' %}">修改信息</a></dd>
         </dl>
     </li>
 
-    <li class="layui-nav-item"><a href="">退出登录</a></li>
+    <li class="layui-nav-item"><a href="{% url 'login' %}">退出登录</a></li>
 {% endblock %}
 
 {% block side-nav %}
 
     <li class="layui-nav-item">
-        <a href="courseApply.html">选课事务申请</a>
+        <a href="{% url 'teacherCourseApply' %}">选课事务申请</a>
     </li>
 
     <li class="layui-nav-item">
-        <a class="" href="registerScore.html">期末考试分数登记</a>
+        <a href="javascript:;">开课管理</a>
+        <dl class="layui-nav-child">
+            <dd><a href="{% url 'teacherCourse' %}">已开设课程</a></dd>
+            <dd><a href="{% url 'showAddCourse' %}">开设新课</a></dd>
+            <dd><a href="{% url 'teacherLoadGrades' %}">期末考试分数登记</a></dd>
+        </dl>
     </li>
 
 {% endblock %}

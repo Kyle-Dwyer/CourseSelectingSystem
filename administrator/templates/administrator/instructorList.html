@@ -1,12 +1,10 @@
-{% extends 'student/student.html' %}
+{% extends 'administrator/administrator.html' %}
 
 {% block body %}
-
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-        <legend>我的成绩单</legend>
+        <legend>教师列表</legend>
     </fieldset>
-
-    <table class="layui-hide" id="transcript" lay-filter="demo"></table>
+    <table id="instructor_list" lay-filter="demo"></table>
 {% endblock %}
 
 {% block js %}
@@ -17,20 +15,21 @@
 
         });
 
+
         layui.use('table', function () {
             var table = layui.table;
 
             table.render({
-                elem: '#transcript'
-                , url: "{% url 'showTranscript' %}"
+                elem: '#instructor_list'
                 , limit: 6
-                , method: 'get'
+                , url: "{% url 'showInstructorList' %}"
                 , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
                 , cols: [[
-                    {field: 'course_id', title: '课程代码', sort: true}
-                    , {field: 'course_name', title: '课程名称'}
-                    , {field: 'credit', title: '学分', sort: true}
-                    , {field: 'grade', title: '成绩', sort: true}
+                    {field: 'i_id', title: '工号', sort: true}
+                    , {field: 'name', title: '姓名'}
+                    , {field: 'dept_name', title: '所属院系'}
+                    , {field: 'phone_num', title: '联系方式'}
+                    , {field: 'salary', title: '薪水'}
                 ]]
                 , parseData: function (res) { //res 即为原始返回的数据
                     return {

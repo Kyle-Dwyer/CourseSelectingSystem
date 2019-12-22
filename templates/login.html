@@ -31,7 +31,7 @@
                 <td><label for="username">用户名:&nbsp;</label></td>
                 <td>
                     <input name="username" id="username" tabindex="1" title="请输入用户名" type="text" value=""
-                           style="width:105px;"/>
+                           style="width:105px;" onkeypress="if(event.keyCode === 13) {document.getElementById('password').focus();}"/>
                 </td>
             </tr>
             <tr>
@@ -39,7 +39,7 @@
                     <label for="password">密　码:&nbsp;</label>
                 </td>
                 <td>
-                    <input id="password" name="password" tabindex="2" type="password" style="width:105px;"/>
+                    <input id="password" name="password" tabindex="2" type="password" style="width:105px;" onkeypress="if(event.keyCode === 13) {document.getElementById('save').click();}"/>
                     <input name="encodedPassword" type="hidden" value=""/>
                 </td>
             </tr>

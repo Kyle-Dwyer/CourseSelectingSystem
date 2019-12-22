@@ -3,8 +3,6 @@ from django.shortcuts import render
 from django.db import connection
 from django.views.decorators.csrf import csrf_exempt
 
-info = None
-
 
 # Create your views here.
 def get_stu_info(stu_id):
@@ -31,13 +29,12 @@ def index(request):
         return render(request, 'student/studentInfo.html', {'error': "no stu_id"})
     print("debug", stu_id)
 
-    global info
     info = get_stu_info(stu_id)
     return render(request, 'student/studentInfo.html', info)
 
 
 def showStudentInfoManage(request):
-    return render(request, 'student/studentInfoManage.html', info)
+    return render(request, 'student/studentInfoManage.html', get_stu_info(request.session.get('student_id')))
 
 
 def saveStudentInfo(request):
@@ -54,11 +51,23 @@ def showCourseTable(request):
 
 
 def showCourseApply(request):
-    return render(request, 'student/courseApply.html', info)
+    # 如果不在选课期间，不能进入该页面
+    period = request.session.get("period", 0)
+
+    print("period:%s" % period)
+    if period != 0:
+        return render(request, 'error.html', {"msg": "当前不在选课期间，无法进行选课申请！"})
+    return render(request, 'student/courseApply.html')
 
 
 def showCourseManage(request):
-    return render(request, 'student/courseManage.html', info)
+    # 如果不在选课期间，不能进入该页面
+    period = request.session.get("period", 0)
+
+    print("period:%s" % period)
+    if period != 0:
+        return render(request, 'error.html', {"msg": "当前不在选课期间，无法进行选退课操作！"})
+    return render(request, 'student/courseManage.html')
 
 
 def showCourse(request):
@@ -69,7 +78,7 @@ def showCourse(request):
 
     # print(course_id)
     # print(course_name)
-    sql = "select course_id, sec_id, course_name, ctime_slot_id from course natural join main.section where course_id like %s and course_name like %s"
+    sql = "select course_id, sec_id, course_name, building, room_num, ctime_slot_id from course natural join `section` where course_id like %s and course_name like %s"
     cursor = connection.cursor()
     cursor.execute(sql, ['%' + course_id + '%', '%' + course_name + '%'])
     results = cursor.fetchall()
@@ -80,8 +89,24 @@ def showCourse(request):
     toIndex = min(len(results), page * pageSize)
     for i in range(fromIndex, toIndex):
         result = results[i]
+
+        ctime_slot_id = result[5]
+
+        sql = "select `day`, start_time, end_time from ctime_slot where ctime_slot_id = %s"
+        cursor.execute(sql, [ctime_slot_id])
+        result2 = cursor.fetchall()
+
+        ctime = ""
+        for j in range(len(result2)):
+            day = result2[j][0]
+            start_time = result2[j][1]
+            end_time = result2[j][2]
+            ctime += day + " " + str(start_time) + "-" + str(end_time) + ";"
+
+
         returnList.append(
-            {'course_id': result[0] + '.' + str(result[1]), 'course_name': result[2], 'ctime_slot_id': result[3]})
+            {'course_id': result[0] + '.' + str(result[1]), 'course_name': result[2], 'place': result[3] + "." + result[4],
+             'ctime': ctime})
 
     # print(returnList)
     return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': len(results), 'list': returnList})
@@ -96,6 +121,7 @@ def no_conflict(start1, end1, start2, end2):
 
 def _selectCourse(s_id, c_id, sec_id):
     error_none = {"error": "选课失败，该课程不存在", "selected": False}
+
     cursor = connection.cursor()
     # 插入还是更新
     check_sql = "select dropped from takes where s_id = %s and course_id = %s and sec_id = %s"
@@ -300,6 +326,7 @@ def selectCourse(request):
     sec_id = course_id.split(".")[1]
 
     s_id = request.session.get('student_id', '')
+
     state = _selectCourse(s_id, c_id, sec_id)
     return JsonResponse(state)
 
@@ -307,10 +334,10 @@ def selectCourse(request):
 def showSelectedCourse(request):
     s_id = request.session.get('student_id', '')
 
-    pageSize = 6
+    pageSize = 10
     page = int(request.GET.get('page', 1))
 
-    sql = "select course_id, sec_id, course_name, ctime_slot_id from course natural join `section` where (course_id, sec_id) in (select course_id, sec_id from takes where s_id = %s and dropped = 0)"
+    sql = "select course_id, sec_id, course_name, ctime_slot_id from `section` natural join course  where (course_id, sec_id) in (select course_id, sec_id from takes where s_id = %s and dropped = 0)"
     cursor = connection.cursor()
     cursor.execute(sql, [s_id])
     results = cursor.fetchall()
@@ -363,10 +390,6 @@ def dejectCourse(request):
     return JsonResponse({"error": None, "dejected": True})
 
 
-def showTranscript(request):
-    return render(request, 'student/transcript.html', info)
-
-
 def showAppliedCourse(request):
     s_id = request.session.get('student_id', '')
 
@@ -395,6 +418,8 @@ def showAppliedCourse(request):
                 state = "申请成功"
             elif state == 2:
                 state = "申请失败"
+            elif state == 3:
+                state = "已过期"
             handle_reason = results[i][2]
             course_id = results[i][3]
             sec_id = results[i][4]
@@ -405,3 +430,90 @@ def showAppliedCourse(request):
                  'handle_reason': handle_reason, 'state': state})
 
         return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': len(results), 'list': returnList})
+
+
+def transcript(request):
+    return render(request, 'student/transcript.html')
+
+
+def showTranscript(request):
+    stu_id = request.session.get('student_id')
+
+    page = int(request.GET.get('page', 1))
+    pageSize = 6
+
+    # print(course_id)
+    # print(course_name)
+    sql = "select course_id, sec_id, course_name, course.credits, takes.credit from course natural join main.section natural join takes where s_id = %s and takes.dropped = 0"
+    cursor = connection.cursor()
+    cursor.execute(sql, [stu_id])
+    results = cursor.fetchall()
+
+    returnList = []
+
+    fromIndex = (page - 1) * pageSize
+    toIndex = min(len(results), page * pageSize)
+    for i in range(fromIndex, toIndex):
+        result = results[i]
+        grade = result[4]
+        if grade is None or grade == "":
+            grade = "成绩暂未公布"
+        returnList.append(
+            {'course_id': result[0] + '.' + str(result[1]), 'course_name': result[2], 'credit': result[3],
+             'grade': grade})
+
+    # print(returnList)
+    return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': len(results), 'list': returnList})
+
+
+def studentExamList(request):
+    return render(request, 'student/examList.html')
+
+
+def showStudentExamList(request):
+    stu_id = request.session.get('student_id')
+
+    page = int(request.GET.get('page', 1))
+    pageSize = 6
+
+    sql = "select course_id, sec_id, course_name, `type`, `day`, building, room_num, start_time, end_time from course natural join takes natural join exam natural join etime_slot where s_id = %s and takes.dropped = 0"
+
+    cursor = connection.cursor()
+    cursor.execute(sql, [stu_id])
+    results = cursor.fetchall()
+
+    returnList = []
+
+    fromIndex = (page - 1) * pageSize
+    toIndex = min(len(results), page * pageSize)
+    for i in range(fromIndex, toIndex):
+        result = results[i]
+        c_id = result[0]
+        sec_id = result[1]
+        course_name = result[2]
+        type = int(result[3])
+        day = result[4]
+        building = result[5]
+        room_num = result[6]
+        start_time = result[7]
+        end_time = result[8]
+
+        etime = ""
+        place = ""
+
+        if type == 0:
+            type = "考试"
+            etime = day + " " + str(start_time) + "-" + str(end_time)
+            place = building + "." + room_num
+
+        else:
+            type = "论文"
+            etime = day + " " + str(start_time)
+            place = "无"
+
+        returnList.append(
+            {'course_id': c_id + '.' + str(sec_id), 'course_name': course_name, 'type': type,
+             'place': place, 'etime': etime})
+
+    # print(returnList)
+    return JsonResponse({'pageSize': pageSize, 'currentPage': page, 'totalNum': len(results), 'list': returnList})

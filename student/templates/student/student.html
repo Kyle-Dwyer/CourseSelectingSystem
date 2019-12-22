@@ -13,7 +13,7 @@
           <dd><a href="{% url 'studentInfoManage' %}">修改信息</a></dd>
         </dl>
       </li>
-      <li class="layui-nav-item"><a href=''>退出登录</a></li>
+      <li class="layui-nav-item"><a href='{% url 'login' %}'>退出登录</a></li>
 {% endblock %}
 
 {% block side-nav %}
@@ -27,8 +27,12 @@
         <a href="{% url 'courseTable' %}">我的课程表</a>
     </li>
 
+    <li class="layui-nav-item">
+        <a href="{% url 'studentExamList' %}">我的考试信息</a>
+    </li>
+
     <li class="layui-nav-item {% block nav3 %}{% endblock %}">
-        <a href="transcript.html">我的成绩单</a>
+        <a href="{% url 'transcript' %}">我的成绩单</a>
     </li>
 
     <li class="layui-nav-item {% block nav4 %}{% endblock %}">

@@ -66,7 +66,8 @@
                 , cols: [[
                     {field: 'course_id', title: '课程代码', sort: true}
                     , {field: 'course_name', title: '课程名称'}
-                    , {field: 'ctime_slot_id', title: '上课时间段', sort: true}
+                    , {field: 'place', title: '上课地点'}
+                    , {field: 'ctime', title: '上课时间', sort: true}
                     , {fixed: 'right', title: '操作', width: 178, align: 'center', toolbar: '#barDemo1'}
                 ]]
                 , parseData: function (res) { //res 即为原始返回的数据
@@ -114,7 +115,7 @@
                             },
                             success: function (data) {
                                 if (data.error == null) {
-                                    layer.msg("选课成功！")
+                                    layer.msg("选课成功！");
                                     reloadSelectedCourse()
                                 } else {
                                     layer.msg(data.error)
@@ -130,7 +131,7 @@
             table.render({
                 elem: '#coursesTable'
                 , url: "{% url 'showSelectedCourse' %}"
-                , limit: 6
+                , limit: 10
                 , method: 'get'
                 , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
                 , cols: [[

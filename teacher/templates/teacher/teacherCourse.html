@@ -1,0 +1,128 @@
+{% extends 'teacher/teacher.html' %}
+
+{% block body %}
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>我的已开设课程</legend>
+    </fieldset>
+    <table class="layui-hide" id="courses" lay-filter="demo"></table>
+
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>课程花名册</legend>
+    </fieldset>
+    <table class="layui-hide" id="roster" lay-filter="demo2"></table>
+{% endblock %}
+
+{% block js %}
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">查看花名册</a>
+    </script>
+    <script>
+        layui.use('element', function () {
+            var element = layui.element;
+
+        });
+
+        layui.use('table', function () {
+            var table = layui.table;
+
+            table.render({
+                elem: '#courses'
+                , url: "{% url 'showTeacherCourse' %}"
+                , limit: 6
+                , method: 'get'
+                , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                , cols: [[
+                    {field: 'course_id', title: '课程代码', sort: true}
+                    , {field: 'course_name', title: '课程名称'}
+                    , {field: 'place', title: '上课地点'}
+                    , {field: 'ctime', title: '上课时间', sort: true}
+                    , {fixed: 'right', title: '操作', width: 178, align: 'center', toolbar: '#barDemo'}
+                ]]
+                , parseData: function (res) { //res 即为原始返回的数据
+                    return {
+                        "code": 0, //解析接口状态
+                        "msg": "", //解析提示文本
+                        "count": res.totalNum, //解析数据长度
+                        "data": res.list//解析数据列表
+                    };
+                }
+                , page: true
+            });
+
+            table.render({
+                elem: '#roster'
+                , url: "{% url 'showCourseRoster' %}"
+                , limit: 6
+                , method: 'get'
+                , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                , cols: [[
+                    {field: 's_id', title: '学号', sort: true}
+                    , {field: 'name', title: '姓名'}
+                    , {field: 'dept_name', title: '所属院系'}
+                    , {field: 'grade', title: '分数', edit: 'text'}
+                ]]
+                , parseData: function (res) { //res 即为原始返回的数据
+                    return {
+                        "code": 0, //解析接口状态
+                        "msg": "", //解析提示文本
+                        "count": res.totalNum, //解析数据长度
+                        "data": res.list//解析数据列表
+                    };
+                }
+                , id: 'testReload'
+                , page: true
+            });
+
+            var course_id = "";
+
+            table.on('tool(demo)', function (obj) {
+                var data = obj.data;
+
+                if (obj.event === 'edit') {
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            "course_id": data.course_id
+                        }
+                    }, 'data');
+
+                    course_id = data.course_id
+                }
+            });
+
+            table.on('edit(demo2)', function (obj) {
+                var grade = obj.value;
+
+                $.ajax({
+                    url: '{% url 'registerScore' %}',
+                    type: 'get',
+                    data: {
+                        "course_id": course_id,
+                        "s_id": obj.data.s_id,
+                        "grade": grade
+                    },
+                    success: function (data) {
+                        if (data.error == null) {
+                            layer.msg("登分成功！");
+                            table.reload('testReload', {
+                                page: {
+                                    curr: 1 //重新从第 1 页开始
+                                }
+                                , where: {
+                                    "course_id": course_id,
+                                }
+                            }, 'data');
+                        } else {
+                            layer.msg(data.error)
+                        }
+                    }
+                });
+            });
+
+        });
+
+
+    </script>
+{% endblock %}
